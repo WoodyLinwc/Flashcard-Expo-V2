@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Animated, TouchableWithoutFeedback } from 'react-native';
-import { Card, Title, Paragraph, Button } from 'react-native-paper';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { Button, Title, Paragraph, IconButton } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { useAppState } from '../contexts/AppStateContext';
+import Flashcard from '../components/Flashcard';
+import { PanGestureHandler, PanGestureHandlerStateChangeEvent, State } from 'react-native-gesture-handler';
 
 type FlashcardScreenRouteProp = RouteProp<RootStackParamList, 'Flashcard'>;
 type FlashcardScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Flashcard'>;
@@ -18,7 +20,30 @@ const FlashcardScreen: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  const animatedValue = new Animated.Value(0);
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
+
+  const nextCard = useCallback(() => {
+    if (currentIndex < flashcards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+    }
+  }, [currentIndex, flashcards.length]);
+
+  const prevCard = useCallback(() => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+    }
+  }, [currentIndex]);
+
+  const shuffleCards = useCallback(() => {
+    const shuffled = [...flashcards].sort(() => Math.random() - 0.5);
+    setFlashcards(shuffled);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  }, [flashcards]);
 
   useEffect(() => {
     const loadFlashcards = async () => {
@@ -28,57 +53,26 @@ const FlashcardScreen: React.FC = () => {
     loadFlashcards();
   }, [deckId, getFlashcards]);
 
-  const flipCard = () => {
-    if (isFlipped) {
-      Animated.spring(animatedValue, {
-        toValue: 0,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.spring(animatedValue, {
-        toValue: 180,
-        friction: 8,
-        tension: 10,
-        useNativeDriver: true,
-      }).start();
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          icon="shuffle"
+          onPress={shuffleCards}
+        />
+      ),
+    });
+  }, [navigation, shuffleCards]);
+
+  const handleSwipe = (event: PanGestureHandlerStateChangeEvent) => {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
+      const { translationX } = event.nativeEvent;
+      if (translationX > 50) {
+        prevCard();
+      } else if (translationX < -50) {
+        nextCard();
+      }
     }
-    setIsFlipped(!isFlipped);
-  };
-
-  const nextCard = () => {
-    if (currentIndex < flashcards.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsFlipped(false);
-      animatedValue.setValue(0);
-    }
-  };
-
-  const prevCard = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setIsFlipped(false);
-      animatedValue.setValue(0);
-    }
-  };
-
-  const frontInterpolate = animatedValue.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['0deg', '180deg'],
-  });
-
-  const backInterpolate = animatedValue.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['180deg', '360deg'],
-  });
-
-  const frontAnimatedStyle = {
-    transform: [{ rotateY: frontInterpolate }],
-  };
-
-  const backAnimatedStyle = {
-    transform: [{ rotateY: backInterpolate }],
   };
 
   if (flashcards.length === 0) {
@@ -98,36 +92,27 @@ const FlashcardScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={flipCard}>
-        <View>
-          <Animated.View style={[styles.flashcard, frontAnimatedStyle]}>
-            <Card>
-              <Card.Content>
-                <Title>Front</Title>
-                <Paragraph>{flashcards[currentIndex].front}</Paragraph>
-              </Card.Content>
-            </Card>
-          </Animated.View>
-          <Animated.View style={[styles.flashcard, styles.flashcardBack, backAnimatedStyle]}>
-            <Card>
-              <Card.Content>
-                <Title>Back</Title>
-                <Paragraph>{flashcards[currentIndex].back}</Paragraph>
-              </Card.Content>
-            </Card>
-          </Animated.View>
+    <PanGestureHandler onHandlerStateChange={handleSwipe}>
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={handleFlip}>
+          <View style={styles.flashcardContainer}>
+            <Flashcard
+              front={flashcards[currentIndex].front}
+              back={flashcards[currentIndex].back}
+              isFlipped={isFlipped}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+        <View style={styles.buttonContainer}>
+          <Button mode="contained" onPress={prevCard} disabled={currentIndex === 0}>
+            Previous
+          </Button>
+          <Button mode="contained" onPress={nextCard} disabled={currentIndex === flashcards.length - 1}>
+            Next
+          </Button>
         </View>
-      </TouchableWithoutFeedback>
-      <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={prevCard} disabled={currentIndex === 0}>
-          Previous
-        </Button>
-        <Button mode="contained" onPress={nextCard} disabled={currentIndex === flashcards.length - 1}>
-          Next
-        </Button>
       </View>
-    </View>
+    </PanGestureHandler>
   );
 };
 
@@ -138,21 +123,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  flashcard: {
+  flashcardContainer: {
     width: 300,
     height: 200,
-    backfaceVisibility: 'hidden',
-  },
-  flashcardBack: {
-    position: 'absolute',
-    top: 0,
+    marginBottom: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
     paddingHorizontal: 20,
-    marginTop: 20,
   },
   addCardButton: {
     marginTop: 20,
