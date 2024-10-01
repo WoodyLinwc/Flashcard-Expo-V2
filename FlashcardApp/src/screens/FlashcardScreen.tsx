@@ -1,43 +1,97 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Animated, TouchableWithoutFeedback } from 'react-native';
 import { Card, Title, Paragraph, Button } from 'react-native-paper';
-import { useRoute } from '@react-navigation/native';
+import { FlashcardScreenNavigationProp, FlashcardScreenRouteProp } from '../types/navigation';
 import { useAppState } from '../contexts/AppStateContext';
 
-type Flashcard = {
-  id: number;
-  front: string;
-  back: string;
+type Props = {
+  navigation: FlashcardScreenNavigationProp;
+  route: FlashcardScreenRouteProp;
 };
 
-const FlashcardScreen = () => {
-  const route = useRoute();
-  const { flashcardId, deckId } = route.params as { flashcardId: number; deckId: number };
+const FlashcardScreen: React.FC<Props> = ({ route }) => {
+  const { deckId, flashcardId } = route.params;
   const { getFlashcard } = useAppState();
-  const [flashcard, setFlashcard] = useState<Flashcard | null>(null);
+  const [flashcard, setFlashcard] = useState<{ front: string; back: string } | null>(null);
   const [isFlipped, setIsFlipped] = useState(false);
+
+  // Animation value for card flip
+  const animatedValue = new Animated.Value(0);
 
   useEffect(() => {
     const loadFlashcard = async () => {
       const card = await getFlashcard(deckId, flashcardId);
-      setFlashcard(card);
+      if (card) {
+        setFlashcard({ front: card.front, back: card.back });
+      }
     };
     loadFlashcard();
-  }, [flashcardId, deckId]);
+  }, [deckId, flashcardId, getFlashcard]);
+
+  const flipCard = () => {
+    if (isFlipped) {
+      Animated.spring(animatedValue, {
+        toValue: 0,
+        friction: 8,
+        tension: 10,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.spring(animatedValue, {
+        toValue: 180,
+        friction: 8,
+        tension: 10,
+        useNativeDriver: true,
+      }).start();
+    }
+    setIsFlipped(!isFlipped);
+  };
+
+  const frontInterpolate = animatedValue.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['0deg', '180deg'],
+  });
+
+  const backInterpolate = animatedValue.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['180deg', '360deg'],
+  });
+
+  const frontAnimatedStyle = {
+    transform: [{ rotateY: frontInterpolate }],
+  };
+
+  const backAnimatedStyle = {
+    transform: [{ rotateY: backInterpolate }],
+  };
 
   if (!flashcard) {
-    return <View><Title>Loading...</Title></View>;
+    return <View style={styles.container}><Title>Loading...</Title></View>;
   }
 
   return (
     <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Title>{isFlipped ? 'Back' : 'Front'}</Title>
-          <Paragraph>{isFlipped ? flashcard.back : flashcard.front}</Paragraph>
-        </Card.Content>
-      </Card>
-      <Button mode="contained" onPress={() => setIsFlipped(!isFlipped)}>
+      <TouchableWithoutFeedback onPress={flipCard}>
+        <View>
+          <Animated.View style={[styles.flashcard, frontAnimatedStyle]}>
+            <Card>
+              <Card.Content>
+                <Title>Front</Title>
+                <Paragraph>{flashcard.front}</Paragraph>
+              </Card.Content>
+            </Card>
+          </Animated.View>
+          <Animated.View style={[styles.flashcard, styles.flashcardBack, backAnimatedStyle]}>
+            <Card>
+              <Card.Content>
+                <Title>Back</Title>
+                <Paragraph>{flashcard.back}</Paragraph>
+              </Card.Content>
+            </Card>
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
+      <Button mode="contained" onPress={flipCard} style={styles.flipButton}>
         Flip Card
       </Button>
     </View>
@@ -48,10 +102,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 16,
+    alignItems: 'center',
+    padding: 20,
   },
-  card: {
-    marginBottom: 16,
+  flashcard: {
+    width: 300,
+    height: 200,
+    backfaceVisibility: 'hidden',
+  },
+  flashcardBack: {
+    position: 'absolute',
+    top: 0,
+  },
+  flipButton: {
+    marginTop: 20,
   },
 });
 
