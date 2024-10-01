@@ -117,7 +117,6 @@ const DeckScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Title style={styles.title}>{deckName}</Title>
       <Button 
         mode="contained" 
         onPress={handleStudy}
