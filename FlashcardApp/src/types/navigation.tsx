@@ -4,7 +4,7 @@ import { RouteProp } from '@react-navigation/native';
 export type RootStackParamList = {
   Home: undefined;
   Deck: { deckId: number };
-  Flashcard: { flashcardId: number; deckId: number };
+  Flashcard: { deckId: number; flashcardId?: number };
   CreateDeck: undefined;
   EditCard: { deckId: number; cardId?: number };
 };

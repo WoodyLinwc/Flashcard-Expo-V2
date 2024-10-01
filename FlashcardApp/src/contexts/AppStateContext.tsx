@@ -18,6 +18,7 @@ type AppState = {
   decks: Deck[];
   addDeck: (name: string) => Promise<void>;
   getDeck: (deckId: number) => Promise<Deck | null>;
+  updateDeck: (deckId: number, newName: string) => Promise<void>;
   deleteDeck: (deckId: number) => Promise<void>;
   getFlashcards: (deckId: number) => Promise<Flashcard[]>;
   getFlashcard: (deckId: number, flashcardId: number) => Promise<Flashcard | null>;
@@ -66,6 +67,22 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
 
     const deck = await db.getFirstAsync<Deck>('SELECT * FROM decks WHERE id = ?', deckId);
     return deck || null;
+  };
+
+  const updateDeck = async (deckId: number, newName: string): Promise<void> => {
+    if (!db) throw new Error('Database not initialized');
+
+    await db.runAsync(
+      'UPDATE decks SET name = ? WHERE id = ?',
+      newName,
+      deckId
+    );
+
+    setDecks(prevDecks => 
+      prevDecks.map(deck => 
+        deck.id === deckId ? { ...deck, name: newName } : deck
+      )
+    );
   };
 
   const deleteDeck = async (deckId: number): Promise<void> => {
@@ -150,6 +167,7 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     decks,
     addDeck,
     getDeck,
+    updateDeck,
     deleteDeck,
     getFlashcards,
     getFlashcard,
