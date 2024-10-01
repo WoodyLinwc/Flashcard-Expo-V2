@@ -1,50 +1,46 @@
 import React from 'react';
-import { View, FlatList } from 'react-native';
-import { List, FAB } from 'react-native-paper';
+import { View, StyleSheet } from 'react-native';
+import { FAB } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { CompositeNavigationProp } from '@react-navigation/native';
-import { useAppState } from '../contexts/AppStateContext';
 import { RootStackParamList } from '../types/navigation';
+import DeckList from '../components/DeckList';
 
-type HomeScreenNavigationProp = CompositeNavigationProp<
-  StackNavigationProp<RootStackParamList, 'Home'>,
-  StackNavigationProp<RootStackParamList>
->;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
-type Props = {
-  navigation: HomeScreenNavigationProp;
-};
+const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
 
-const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const { decks } = useAppState();
+  const handleDeckPress = (deckId: number) => {
+    navigation.navigate('Deck', { deckId });
+  };
 
-  const renderDeckItem = ({ item }: { item: { id: number; name: string; cardCount: number } }) => (
-    <List.Item
-      title={item.name}
-      description={`${item.cardCount} cards`}
-      onPress={() => navigation.navigate('Deck', { deckId: item.id })}
-    />
-  );
+  const handleAddDeck = () => {
+    navigation.navigate('CreateDeck');
+  };
 
   return (
-    <View style={{ flex: 1 }}>
-      <FlatList
-        data={decks}
-        renderItem={renderDeckItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
+    <View style={styles.container}>
+      <DeckList onDeckPress={handleDeckPress} />
       <FAB
-        style={{
-          position: 'absolute',
-          margin: 16,
-          right: 0,
-          bottom: 0,
-        }}
+        style={styles.fab}
         icon="plus"
-        onPress={() => {/* TODO: Implement add new deck */}}
+        onPress={handleAddDeck}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+  },
+});
 
 export default HomeScreen;
