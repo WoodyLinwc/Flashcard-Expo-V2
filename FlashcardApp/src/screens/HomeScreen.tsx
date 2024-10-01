@@ -1,15 +1,16 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { FAB } from 'react-native-paper';
+import { List, FAB } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
-import DeckList from '../components/DeckList';
+import { useAppState } from '../contexts/AppStateContext';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const { decks } = useAppState();
 
   const handleDeckPress = (deckId: number) => {
     navigation.navigate('Deck', { deckId });
@@ -21,7 +22,15 @@ const HomeScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <DeckList onDeckPress={handleDeckPress} />
+      {decks.map((deck) => (
+        <List.Item
+          key={deck.id}
+          title={deck.name}
+          description={`${deck.cardCount} cards`}
+          onPress={() => handleDeckPress(deck.id)}
+          right={() => <List.Icon icon="chevron-right" />}
+        />
+      ))}
       <FAB
         style={styles.fab}
         icon="plus"

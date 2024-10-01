@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Animated, TouchableWithoutFeedback } from 'react-native';
 import { Card, Title, Paragraph, Button } from 'react-native-paper';
-import { FlashcardScreenNavigationProp, FlashcardScreenRouteProp } from '../types/navigation';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types/navigation';
 import { useAppState } from '../contexts/AppStateContext';
 
-type Props = {
-  navigation: FlashcardScreenNavigationProp;
-  route: FlashcardScreenRouteProp;
-};
+type FlashcardScreenRouteProp = RouteProp<RootStackParamList, 'Flashcard'>;
+type FlashcardScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Flashcard'>;
 
-const FlashcardScreen: React.FC<Props> = ({ route }) => {
-  const { deckId, flashcardId } = route.params;
-  const { getFlashcard } = useAppState();
-  const [flashcard, setFlashcard] = useState<{ front: string; back: string } | null>(null);
+const FlashcardScreen: React.FC = () => {
+  const route = useRoute<FlashcardScreenRouteProp>();
+  const navigation = useNavigation<FlashcardScreenNavigationProp>();
+  const { deckId } = route.params;
+  const { getFlashcards } = useAppState();
+  const [flashcards, setFlashcards] = useState<Array<{ id: number; front: string; back: string }>>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Animation value for card flip
   const animatedValue = new Animated.Value(0);
 
   useEffect(() => {
-    const loadFlashcard = async () => {
-      const card = await getFlashcard(deckId, flashcardId);
-      if (card) {
-        setFlashcard({ front: card.front, back: card.back });
-      }
+    const loadFlashcards = async () => {
+      const cards = await getFlashcards(deckId);
+      setFlashcards(cards);
     };
-    loadFlashcard();
-  }, [deckId, flashcardId, getFlashcard]);
+    loadFlashcards();
+  }, [deckId, getFlashcards]);
 
   const flipCard = () => {
     if (isFlipped) {
@@ -47,6 +47,22 @@ const FlashcardScreen: React.FC<Props> = ({ route }) => {
     setIsFlipped(!isFlipped);
   };
 
+  const nextCard = () => {
+    if (currentIndex < flashcards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+      animatedValue.setValue(0);
+    }
+  };
+
+  const prevCard = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+      animatedValue.setValue(0);
+    }
+  };
+
   const frontInterpolate = animatedValue.interpolate({
     inputRange: [0, 180],
     outputRange: ['0deg', '180deg'],
@@ -65,8 +81,20 @@ const FlashcardScreen: React.FC<Props> = ({ route }) => {
     transform: [{ rotateY: backInterpolate }],
   };
 
-  if (!flashcard) {
-    return <View style={styles.container}><Title>Loading...</Title></View>;
+  if (flashcards.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Title>No cards in this deck</Title>
+        <Paragraph>Add some cards to start studying!</Paragraph>
+        <Button 
+          mode="contained" 
+          onPress={() => navigation.navigate('EditCard', { deckId })}
+          style={styles.addCardButton}
+        >
+          Add Card
+        </Button>
+      </View>
+    );
   }
 
   return (
@@ -77,7 +105,7 @@ const FlashcardScreen: React.FC<Props> = ({ route }) => {
             <Card>
               <Card.Content>
                 <Title>Front</Title>
-                <Paragraph>{flashcard.front}</Paragraph>
+                <Paragraph>{flashcards[currentIndex].front}</Paragraph>
               </Card.Content>
             </Card>
           </Animated.View>
@@ -85,15 +113,20 @@ const FlashcardScreen: React.FC<Props> = ({ route }) => {
             <Card>
               <Card.Content>
                 <Title>Back</Title>
-                <Paragraph>{flashcard.back}</Paragraph>
+                <Paragraph>{flashcards[currentIndex].back}</Paragraph>
               </Card.Content>
             </Card>
           </Animated.View>
         </View>
       </TouchableWithoutFeedback>
-      <Button mode="contained" onPress={flipCard} style={styles.flipButton}>
-        Flip Card
-      </Button>
+      <View style={styles.buttonContainer}>
+        <Button mode="contained" onPress={prevCard} disabled={currentIndex === 0}>
+          Previous
+        </Button>
+        <Button mode="contained" onPress={nextCard} disabled={currentIndex === flashcards.length - 1}>
+          Next
+        </Button>
+      </View>
     </View>
   );
 };
@@ -114,7 +147,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
   },
-  flipButton: {
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  addCardButton: {
     marginTop: 20,
   },
 });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { TextInput, Button, IconButton, Dialog, Portal, Paragraph } from 'react-native-paper';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
@@ -15,7 +15,8 @@ const EditCardScreen: React.FC = () => {
   const { deckId, cardId } = route.params;
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
-  const { getFlashcard, updateFlashcard, addFlashcard } = useAppState();
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const { getFlashcard, updateFlashcard, addFlashcard, deleteFlashcard } = useAppState();
 
   useEffect(() => {
     const loadCard = async () => {
@@ -29,7 +30,15 @@ const EditCardScreen: React.FC = () => {
     };
     loadCard();
 
-    navigation.setOptions({ title: cardId ? 'Edit Card' : 'Add Card' });
+    navigation.setOptions({
+      title: cardId ? 'Edit Card' : 'Add Card',
+      headerRight: cardId ? () => (
+        <IconButton
+          icon="delete"
+          onPress={() => setIsDeleteDialogVisible(true)}
+        />
+      ) : undefined,
+    });
   }, [deckId, cardId, getFlashcard, navigation]);
 
   const handleSave = async () => {
@@ -39,6 +48,13 @@ const EditCardScreen: React.FC = () => {
       } else {
         await addFlashcard(deckId, front.trim(), back.trim());
       }
+      navigation.goBack();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (cardId) {
+      await deleteFlashcard(deckId, cardId);
       navigation.goBack();
     }
   };
@@ -60,6 +76,18 @@ const EditCardScreen: React.FC = () => {
       <Button mode="contained" onPress={handleSave} disabled={!front.trim() || !back.trim()}>
         Save Card
       </Button>
+      <Portal>
+        <Dialog visible={isDeleteDialogVisible} onDismiss={() => setIsDeleteDialogVisible(false)}>
+          <Dialog.Title>Delete Card</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>Are you sure you want to delete this card? This action cannot be undone.</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setIsDeleteDialogVisible(false)}>Cancel</Button>
+            <Button onPress={handleDelete}>Delete</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 };

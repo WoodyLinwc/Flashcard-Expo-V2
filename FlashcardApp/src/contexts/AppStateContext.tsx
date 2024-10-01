@@ -18,10 +18,12 @@ type AppState = {
   decks: Deck[];
   addDeck: (name: string) => Promise<void>;
   getDeck: (deckId: number) => Promise<Deck | null>;
+  deleteDeck: (deckId: number) => Promise<void>;
   getFlashcards: (deckId: number) => Promise<Flashcard[]>;
   getFlashcard: (deckId: number, flashcardId: number) => Promise<Flashcard | null>;
   updateFlashcard: (deckId: number, flashcardId: number, front: string, back: string) => Promise<void>;
   addFlashcard: (deckId: number, front: string, back: string) => Promise<void>;
+  deleteFlashcard: (deckId: number, flashcardId: number) => Promise<void>;
 };
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -64,6 +66,15 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
 
     const deck = await db.getFirstAsync<Deck>('SELECT * FROM decks WHERE id = ?', deckId);
     return deck || null;
+  };
+
+  const deleteDeck = async (deckId: number): Promise<void> => {
+    if (!db) throw new Error('Database not initialized');
+
+    await db.runAsync('DELETE FROM decks WHERE id = ?', deckId);
+    await db.runAsync('DELETE FROM flashcards WHERE deckId = ?', deckId);
+
+    setDecks(prevDecks => prevDecks.filter(deck => deck.id !== deckId));
   };
 
   const getFlashcards = async (deckId: number): Promise<Flashcard[]> => {
@@ -118,14 +129,33 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     );
   };
 
+  const deleteFlashcard = async (deckId: number, flashcardId: number): Promise<void> => {
+    if (!db) throw new Error('Database not initialized');
+
+    await db.runAsync('DELETE FROM flashcards WHERE id = ? AND deckId = ?', flashcardId, deckId);
+
+    await db.runAsync(
+      'UPDATE decks SET cardCount = cardCount - 1 WHERE id = ?',
+      deckId
+    );
+
+    setDecks(prevDecks => 
+      prevDecks.map(deck => 
+        deck.id === deckId ? { ...deck, cardCount: Math.max(0, deck.cardCount - 1) } : deck
+      )
+    );
+  };
+
   const value: AppState = {
     decks,
     addDeck,
     getDeck,
+    deleteDeck,
     getFlashcards,
     getFlashcard,
     updateFlashcard,
     addFlashcard,
+    deleteFlashcard,
   };
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
