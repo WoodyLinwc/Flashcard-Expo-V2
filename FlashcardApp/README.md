@@ -28,9 +28,11 @@
 ## What's Next?
 - I'm considering adding a feature to allow users to import and export decks and cards.
 
-- A quiz and test mode should be good!
-
 - A search bar that helps users find specific cards or decks.
+
+- A quiz and test mode will be good!
+
+
 
 ## Releases
 - 1.0.0 (10/2/2024) Submit to Google Play Console for review!
