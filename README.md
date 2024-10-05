@@ -6,25 +6,25 @@
 A lightweight and intuitive flashcard app designed for both iOS and Android devices. It offers a user-friendly interface for creating, managing, and studying flashcards. With features like deck management, flashcard operations, and study tools, this app is perfect for anyone looking to improve their learning experience.
 
 # Technologies
-- React Native: allows for **cross-platform** development, meaning we can create both iOS and Android apps with a single codebase. Used as the primary framework for building the entire flashcard app.
+- **React Native**: allows for *cross-platform* development, meaning we can create both iOS and Android apps with a single codebase. Used as the primary framework for building the entire flashcard app.
 
-- TypeScript: adds static typing to JavaScript, which helps catch errors early in the development process, improves code readability, and provides better IntelliSense in IDEs.
+- **TypeScript**: adds static typing to JavaScript, which helps catch errors early in the development process, improves code readability, and provides better IntelliSense in IDEs.
 
-- SQLite: provides a lightweight, **serverless** database solution which allows our app to store and retrieve data locally, enabling offline functionality and fast data access. Used for local data storage, managing decks and flashcards.
+- **SQLite**: provides a lightweight, *serverless* database solution which allows our app to store and retrieve data locally, enabling *offline* functionality and fast data access. Used for local data storage, managing decks and flashcards.
 
-- Expo: simplifies the React Native development process by providing a set of **pre-built** components and tools. Used as the development framework and for accessing native APIs.
+- **Expo**: simplifies the React Native development process by providing a set of *pre-built* components and tools. Used as the development framework and for accessing native APIs.
 
-- React Navigation: provides a simple way to manage **navigation state** and transition between screens. It is the standard routing library for React Native.
+- **React Navigation**: provides a simple way to manage *navigation state* and transition between screens. It is the standard routing library for React Native.
 
-- React Native Paper: provides a set of customizable, pre-built UI components that follow **Material Design** guidelines. 
+- **React Native Paper**: provides a set of customizable, pre-built UI components that follow **Material Design** guidelines. 
 
-- React Native Gesture Handler: provides more responsive and fluid gesture handling compared to the built-in React Native gesture system. Used in the FlashcardScreen for implementing swipe gestures to navigate between cards.
+- **React Native Gesture Handler**: provides more responsive and fluid gesture handling compared to the built-in React Native gesture system. Used in the FlashcardScreen for implementing swipe gestures to navigate between cards.
 
-- React Hooks: allow us to use state and other React features in functional components.
+- **React Hooks**: allow us to use state and other React features in functional components.
 
-- React Context API: provides a way to pass data through the component tree without having to pass props down manually at every level. Used for **global state** management, particularly in the AppStateContext for managing decks and flashcards.
+- **React Context API**: provides a way to pass data through the component tree without having to pass props down manually at every level. Used for *global state* management, particularly in the AppStateContext for managing decks and flashcards.
 
-- React Native Animated API: Used in the Flashcard component for creating the card flip animation.
+- **React Native Animated API**: Used in the Flashcard component for creating the card flip animation.
 
 
 
