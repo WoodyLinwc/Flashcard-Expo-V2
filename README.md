@@ -5,6 +5,8 @@
 # Description
 **Flashcard Simple** is a lightweight and intuitive flashcard app designed for both iOS and Android devices. It offers a user-friendly interface for creating, managing, and studying flashcards. With features like deck management, flashcard operations, and study tools, this app is perfect for anyone looking to improve their learning experience.
 
+![](/img/flashcard.jpg)
+
 # Technologies
 - **React Native**: allows for **cross-platform** development, meaning we can create both iOS and Android apps with a single codebase. Used as the primary framework for building the entire flashcard app.
 
