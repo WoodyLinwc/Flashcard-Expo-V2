@@ -70,7 +70,7 @@
 # Release Updates
 - 1.0.0 (10/2/2024) Submit to Google Play Console for review!
 - 1.0.0 (10/5/2024) Closed Testing
-- 1.0.0 (10/22/2024) Open Testing
+- 1.0.0 (10/22/2024) Open Testing and first production release!
 
 # License
 This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
