@@ -61,9 +61,9 @@
 # What's Next?
 - I'm considering adding a feature to allow users to import and export decks and cards.
 
-- A search bar that helps users find specific cards or decks.
-
 - A quiz and test mode will be good!
+
+- ~~A search bar that helps users find specific cards or decks.~~(Done, 12/3/2024)
 
 
 
