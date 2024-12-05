@@ -1,9 +1,11 @@
 # Flashcard Simple (1.0.0) 
 
-
+[Google Play Store: Flashcard Simple](https://play.google.com/store/apps/details?id=com.woodylinwc.FlashcardApp)
 
 # Description
 **Flashcard Simple** is a lightweight and intuitive flashcard app designed for both iOS and Android devices. It offers a user-friendly interface for creating, managing, and studying flashcards. With features like deck management, flashcard operations, and study tools, this app is perfect for anyone looking to improve their learning experience.
+
+![](/img/flashcard.jpg)
 
 # Technologies
 - **React Native**: allows for **cross-platform** development, meaning we can create both iOS and Android apps with a single codebase. Used as the primary framework for building the entire flashcard app.
@@ -59,14 +61,16 @@
 # What's Next?
 - I'm considering adding a feature to allow users to import and export decks and cards.
 
-- A search bar that helps users find specific cards or decks.
-
 - A quiz and test mode will be good!
+
+- ~~A search bar that helps users find specific cards or decks.~~(Done, 12/3/2024)
 
 
 
 # Release Updates
 - 1.0.0 (10/2/2024) Submit to Google Play Console for review!
+- 1.0.0 (10/5/2024) Closed Testing
+- 1.0.0 (10/22/2024) Open Testing and first production release!
 
 # License
 This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.

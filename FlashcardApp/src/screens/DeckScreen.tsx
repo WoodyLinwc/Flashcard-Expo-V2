@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
-import { List, FAB, Button, Title, IconButton, Dialog, Portal, Paragraph, Menu, TextInput, ActivityIndicator } from 'react-native-paper';
+import { List, FAB, Button, IconButton, Dialog, Portal, Paragraph, Menu, TextInput, ActivityIndicator, Searchbar } from 'react-native-paper';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
@@ -28,6 +28,15 @@ const DeckScreen: React.FC = () => {
   const [newDeckName, setNewDeckName] = useState('');
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredFlashcards = useMemo(() => {
+    if (!searchQuery.trim()) return flashcards;
+    return flashcards.filter(card => 
+      card.front.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.back.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [flashcards, searchQuery]);
 
   const loadDeckAndFlashcards = useCallback(async () => {
     setIsLoading(true);
@@ -107,6 +116,7 @@ const DeckScreen: React.FC = () => {
     />
   );
 
+
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -117,6 +127,12 @@ const DeckScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Searchbar
+        placeholder="Search cards"
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchBar}
+      />
       <Button 
         mode="contained" 
         onPress={handleStudy}
@@ -125,12 +141,16 @@ const DeckScreen: React.FC = () => {
         Study
       </Button>
       <FlatList
-        data={flashcards}
+        data={filteredFlashcards}
         renderItem={renderFlashcardItem}
         keyExtractor={(item) => item.id.toString()}
         style={styles.list}
         ListEmptyComponent={
-          <Paragraph style={styles.emptyMessage}>No cards in this deck. Add some to start studying!</Paragraph>
+          searchQuery ? (
+            <Paragraph style={styles.emptyMessage}>No cards match your search.</Paragraph>
+          ) : (
+            <Paragraph style={styles.emptyMessage}>No cards in this deck. Add some to start studying!</Paragraph>
+          )
         }
       />
       <FAB
@@ -178,10 +198,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
+  searchBar: {
+    marginBottom: 16,
   },
   studyButton: {
     marginBottom: 16,

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { List, FAB, Menu, IconButton } from 'react-native-paper';
+import { List, FAB, Menu, IconButton, Searchbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import * as DocumentPicker from 'expo-document-picker';
@@ -15,6 +15,13 @@ const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { decks, exportDecks, importDecks } = useAppState();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+        
+  const filteredDecks = useMemo(() => {
+    return decks.filter(deck => 
+      deck.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [decks, searchQuery]);
 
   const handleExport = async () => {
     try {
@@ -96,7 +103,13 @@ const HomeScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {decks.map((deck) => (
+      <Searchbar
+        placeholder="Search decks"
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchBar}
+      />
+      {filteredDecks.map((deck) => (
         <List.Item
           key={deck.id}
           title={deck.name}
@@ -117,6 +130,9 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  searchBar: {
+    margin: 16,
   },
   fab: {
     position: 'absolute',
