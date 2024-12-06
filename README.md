@@ -1,4 +1,4 @@
-# Flashcard Simple (1.0.0) 
+# Flashcard Simple (1.1.0) 
 
 [Google Play Store: Flashcard Simple](https://play.google.com/store/apps/details?id=com.woodylinwc.FlashcardApp)
 
@@ -50,7 +50,9 @@
 
 ### Data Management
 1. Local Storage: All deck and flashcard data is stored locally on the device using **SQLite**.
-2. Offline Functionality: The app works fully offline, allowing study anytime, anywhere.
+2. Offline Functionality: The app works fully **offline**, allowing study anytime, anywhere.
+3. Import/Export: Users can **import** and **export** decks and flashcards to share their progress with others or back up their data.
+4. Search feature: Users can **search** for specific cards or decks using a search bar.
 
 ### User Interface
 1. Intuitive Design: Clean and user-friendly interface for easy navigation and use.
@@ -59,7 +61,7 @@
 4. Study Mode: Dedicated screen for studying flashcards with a focus on the current card.
 
 # What's Next?
-- I'm considering adding a feature to allow users to import and export decks and cards.
+- ~~I'm considering adding a feature to allow users to import and export decks and cards.~~
 
 - A quiz and test mode will be good!
 
