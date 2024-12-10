@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { List, FAB, Menu, IconButton, Searchbar } from 'react-native-paper';
+import { List, FAB, Menu, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
 import { RootStackParamList } from '../types/navigation';
 import { useAppState } from '../contexts/AppStateContext';
+import SearchBarComponent from '../components/SearchBar';
+import ImportExportMenu from '../components/ImportExport';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -16,48 +15,12 @@ const HomeScreen: React.FC = () => {
   const { decks, exportDecks, importDecks } = useAppState();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-        
+
   const filteredDecks = useMemo(() => {
     return decks.filter(deck => 
       deck.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [decks, searchQuery]);
-
-  const handleExport = async () => {
-    try {
-      const data = await exportDecks();
-      const jsonString = JSON.stringify(data, null, 2);
-      
-      const fileName = `flashcards_${new Date().toISOString().slice(0, 10)}.json`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-      await FileSystem.writeAsStringAsync(fileUri, jsonString);
-
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(fileUri);
-      }
-    } catch (error) {
-      console.error('Export failed:', error);
-    }
-  };
-
-  const handleImport = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/json'
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const fileContent = await FileSystem.readAsStringAsync(result.assets[0].uri);
-        const importedData = JSON.parse(fileContent);
-        await importDecks(importedData);
-      }
-    } catch (error) {
-      console.error('Import failed:', error);
-    }
-  };
-
-
 
   useEffect(() => {
     navigation.setOptions({
@@ -72,25 +35,16 @@ const HomeScreen: React.FC = () => {
             />
           }
         >
-          <Menu.Item 
-            onPress={() => {
-              setIsMenuVisible(false);
-              handleExport();
-            }} 
-            title="Export Decks" 
-          />
-          <Menu.Item 
-            onPress={() => {
-              setIsMenuVisible(false);
-              handleImport();
-            }} 
-            title="Import Decks" 
+          <ImportExportMenu 
+            isVisible={isMenuVisible}
+            onDismiss={() => setIsMenuVisible(false)}
+            onExport={exportDecks}
+            onImport={importDecks}
           />
         </Menu>
       ),
     });
-  }, [navigation, isMenuVisible]);
-
+  }, [navigation, isMenuVisible, exportDecks, importDecks]);
 
   const handleDeckPress = (deckId: number) => {
     navigation.navigate('Deck', { deckId });
@@ -100,14 +54,12 @@ const HomeScreen: React.FC = () => {
     navigation.navigate('CreateDeck');
   };
 
-
   return (
     <View style={styles.container}>
-      <Searchbar
-        placeholder="Search decks"
-        onChangeText={setSearchQuery}
+      <SearchBarComponent
         value={searchQuery}
-        style={styles.searchBar}
+        onChangeText={setSearchQuery}
+        placeholder="Search decks"
       />
       {filteredDecks.map((deck) => (
         <List.Item
@@ -130,9 +82,6 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  searchBar: {
-    margin: 16,
   },
   fab: {
     position: 'absolute',

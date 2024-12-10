@@ -25,6 +25,11 @@ type ExportData = {
   }[];
 };
 
+type ImportResult = {
+  added: string[];
+  skipped: string[];
+};
+
 type AppState = {
   decks: Deck[];
   addDeck: (name: string) => Promise<void>;
@@ -37,7 +42,7 @@ type AppState = {
   addFlashcard: (deckId: number, front: string, back: string) => Promise<void>;
   deleteFlashcard: (deckId: number, flashcardId: number) => Promise<void>;
   exportDecks: () => Promise<ExportData>;
-  importDecks: (data: ExportData) => Promise<void>;
+  importDecks: (data: ExportData) => Promise<ImportResult>;
 };
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
@@ -203,28 +208,42 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
     return exportData;
   };
 
-  const importDecks = async (data: ExportData): Promise<void> => {
+  const importDecks = async (data: ExportData): Promise<ImportResult> => {
     if (!db) throw new Error('Database not initialized');
-
+  
+    const result: ImportResult = {
+      added: [],
+      skipped: [],
+    };
+  
     // Begin transaction
     await db.execAsync('BEGIN TRANSACTION');
-
+  
     try {
-      // Clear existing data
-      await db.execAsync('DELETE FROM flashcards');
-      await db.execAsync('DELETE FROM decks');
-
-      // Import new data
+      // Get existing deck names to check for duplicates
+      const existingDecks = await db.getAllAsync<{ name: string }>(
+        'SELECT name FROM decks'
+      );
+      const existingDeckNames = new Set(existingDecks.map(deck => deck.name));
+  
+      // Import only new decks
       for (const deck of data.decks) {
+        // Skip if deck with same name exists
+        if (existingDeckNames.has(deck.name)) {
+          result.skipped.push(deck.name);
+          continue;
+        }
+  
+        // Add new deck
         const deckResult = await db.runAsync(
           'INSERT INTO decks (name, cardCount) VALUES (?, ?)',
           deck.name,
           deck.cards.length
         );
-
+  
         const deckId = deckResult.lastInsertRowId;
-
-        // Add cards
+  
+        // Add cards for the new deck
         for (const card of deck.cards) {
           await db.runAsync(
             'INSERT INTO flashcards (deckId, front, back) VALUES (?, ?, ?)',
@@ -233,14 +252,18 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
             card.back
           );
         }
+  
+        result.added.push(deck.name);
       }
-
+  
       // Commit transaction
       await db.execAsync('COMMIT');
-
+  
       // Refresh decks state
       const updatedDecks = await db.getAllAsync<Deck>('SELECT * FROM decks');
       setDecks(updatedDecks);
+  
+      return result;
     } catch (error) {
       // Rollback on error
       await db.execAsync('ROLLBACK');
