@@ -5,7 +5,9 @@
 # Description
 **Flashcard Simple** is a lightweight and intuitive flashcard app designed for both iOS and Android devices. It offers a user-friendly interface for creating, managing, and studying flashcards. With features like deck management, flashcard operations, and study tools, this app is perfect for anyone looking to improve their learning experience.
 
-![](/img/flashcard.jpg)
+![](/img/flashcard1.jpg)
+
+![](/img/flashcard2.jpg)
 
 # Technologies
 - **React Native**: allows for **cross-platform** development, meaning we can create both iOS and Android apps with a single codebase. Used as the primary framework for building the entire flashcard app.
@@ -28,18 +30,20 @@
 
 - **React Native Animated API**: Used in the Flashcard component for creating the card flip animation.
 
-
+- **Expo DocumentPicker, FileSystem, and Sharing modules**: provide ways to pick a file with `expo-document-picker`, process it with `expo-file-system`, and share the file externally with `expo-sharing`.
 
 # Features
 ### Decks Management
 1. Create Decks: Users can create multiple decks to organize their flashcards by subject or topic.
 2. Rename Decks: Ability to rename existing decks.
 3. Delete Decks: Option to remove entire decks when they're no longer needed.
+4. Search Decks: Users can search for specific decks using a search bar.
 
 ### Flashcard Operations
 1. Add Flashcards: Users can add new flashcards to any deck, inputting both front and back content.
 2. Edit Flashcards: Existing flashcards can be modified to update their content.
 3. Delete Flashcards: Remove individual flashcards from a deck.
+4. Search Flashcards: Users can search for specific flashcards within a deck.
 
 ### Study Features
 1. Flashcard Flipping: Interactive card flipping animation to reveal the answer side.
@@ -61,7 +65,7 @@
 4. Study Mode: Dedicated screen for studying flashcards with a focus on the current card.
 
 # What's Next?
-- ~~I'm considering adding a feature to allow users to import and export decks and cards.~~
+- ~~I'm considering adding a feature to allow users to import and export decks and cards.~~(Done, 12/10/2024)
 
 - A quiz and test mode will be good!
 
