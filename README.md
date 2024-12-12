@@ -2,6 +2,8 @@
 
 [Google Play Store: Flashcard Simple](https://play.google.com/store/apps/details?id=com.woodylinwc.FlashcardApp)
 
+1.1.0 update notes: Now you can import/export your decks and flashcards to other devices! You can also search for a specific deck and card.
+
 # Description
 **Flashcard Simple** is a lightweight and intuitive flashcard app designed for both iOS and Android devices. It offers a user-friendly interface for creating, managing, and studying flashcards. With features like deck management, flashcard operations, and study tools, this app is perfect for anyone looking to improve their learning experience.
 
@@ -71,10 +73,11 @@
 
 
 
-# Release Updates
+# Release History
 - 1.0.0 (10/2/2024) Submit to Google Play Console for review!
 - 1.0.0 (10/5/2024) Closed Testing
 - 1.0.0 (10/22/2024) Open Testing and first production release!
+- 1.1.0 (12/10/2024) Import/export your decks and flashcards to other devices and search for a specific deck and card.
 
 # License
 This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
