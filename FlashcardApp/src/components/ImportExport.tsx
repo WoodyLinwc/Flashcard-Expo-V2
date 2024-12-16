@@ -70,7 +70,7 @@ const ImportExportMenu: React.FC<ImportExportMenuProps> = ({
       }
     } catch (error) {
       console.error('Import failed:', error);
-      alert('Import failed. Please try again.');
+      alert('Import failed. Please check the file JSON format again.');
     }
   };
 
