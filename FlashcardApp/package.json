@@ -8,6 +8,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web"
   },
+  "overrides": {
+    "@xmldom/xmldom": "^0.9.10",
+    "xmldom": "npm:@xmldom/xmldom@^0.9.10"
+  },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
     "@react-native-community/masked-view": "^0.1.11",
